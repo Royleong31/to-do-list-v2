@@ -101,6 +101,20 @@ app.get("/about", function(req, res) {
 app.post('/delete', function(req, res) {
   const listName = req.body.listName;
   const itemId = req.body.checkboxID;
+  
+  if (listName === 'Today') {
+    Item.findByIdAndRemove(itemId, function(err, ItemFound) {
+      if (!err) {
+        res.redirect('/');
+      }
+    });
+  } else {
+    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: itemId}}}, function(err, listFound) {
+      if (!err) {
+        res.redirect('/' + listName);
+      }
+    });
+  }
 });
 
 app.get('/:customListName', function(req, res) {
