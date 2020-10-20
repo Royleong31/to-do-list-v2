@@ -1,5 +1,5 @@
 //jshint esversion:6
-
+const _ = require('lodash');
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
@@ -69,6 +69,7 @@ app.get("/", function(req, res) {
 app.post("/", function(req, res) {
   const itemName = req.body.newItem;
   const listName = req.body.list;
+  
   if (itemName != '') {
     const item = new Item({
       name: itemName
@@ -79,10 +80,12 @@ app.post("/", function(req, res) {
     }
     else {
       List.findOne({name: listName}, function(err, foundList) {
-        foundList.items.push(item);
-        foundList.save();
-        res.redirect('/' + listName);
-      })
+        if (!err) {
+          foundList.items.push(item);
+          foundList.save();
+          res.redirect('/' + listName);
+        }
+      });
     }
   }
   else if (listName === 'Today'){
@@ -99,15 +102,28 @@ app.get("/about", function(req, res) {
 });
 
 app.post('/delete', function(req, res) {
-  const deletedItemId = req.body.checkboxID;
-  Item.findByIdAndRemove(deletedItemId, function(err) {
-    if (!err) console.log('Successfully deleted checked item');
-  });
-  res.redirect('/');
+  const checkedItemId = req.body.checkboxID;
+  const listName = req.body.listName;
+  
+  if (listName === 'Today'){
+    Item.findByIdAndRemove(checkedItemId, function(err) {
+      if (!err) {
+        console.log('Successfully deleted checked item');
+        res.redirect('/');
+      }  
+    });}
+  else {
+    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundListDoc) {
+      if (!err) {
+        res.redirect('/' + listName);
+      }
+    });
+  }
+
 });
 
 app.get('/:customListName', function(req, res) {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
   List.findOne({name: customListName}, function(err, foundList) {
     if (!err) {
       
