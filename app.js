@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-mongoose.connect('mongodb+srv://admin-roy:Royl3ong@cluster0.woyal.mongodb.net/todoDB?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://admin-roy:<db_password>@cluster0.woyal.mongodb.net/todoDB?retryWrites=true&w=majority', {
   useUnifiedTopology: true,
   useNewUrlParser: true
 });
